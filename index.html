@@ -24,66 +24,33 @@
         .header-section h1 { font-size: 26px; margin: 0; font-family: 'Playfair Display', serif; font-weight: 700; }
         .header-section p { font-size: 18px; font-weight: 600; color: #333; font-family: 'Playfair Display', serif; margin: 5px 0; }
 
-        /* --- SELECTOR DE PÍLDORA --- */
-        .pill-container {
-            display: flex; justify-content: center; margin-bottom: 30px;
-        }
-        .pill {
-            background: #e0e0e0; border-radius: 50px; padding: 5px;
-            display: flex; width: fit-content; border: 1px solid #ccc;
-        }
-        .pill-btn {
-            border: none; padding: 10px 25px; border-radius: 40px;
-            font-size: 13px; font-weight: 700; cursor: pointer;
-            transition: 0.3s; background: transparent; color: #666;
-        }
+        .pill-container { display: flex; justify-content: center; margin-bottom: 30px; }
+        .pill { background: #e0e0e0; border-radius: 50px; padding: 5px; display: flex; width: fit-content; border: 1px solid #ccc; }
+        .pill-btn { border: none; padding: 10px 25px; border-radius: 40px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.3s; background: transparent; color: #666; }
         .pill-btn.active { background: white; color: black; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-        /* --- DIAGRAMA DE REFERENCIA --- */
-        .reference-box {
-            background: white; border-radius: 20px; padding: 15px;
-            margin-bottom: 25px; border: 1px solid #ddd;
-            display: flex; flex-direction: column; align-items: center;
-        }
+        .reference-box { background: white; border-radius: 20px; padding: 15px; margin-bottom: 25px; border: 1px solid #ddd; display: flex; flex-direction: column; align-items: center; }
         .reference-title { font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; margin-bottom: 10px; }
 
-        .grid-inputs {
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: 15px; margin-bottom: 25px;
-        }
-
+        .grid-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
         .input-group { display: flex; flex-direction: column; }
         label { font-size: 11px; font-weight: 700; margin-bottom: 5px; margin-left: 10px; color: #555; }
-        input {
-            padding: 12px 15px; border: 1px solid #ccc; border-radius: 20px;
-            font-size: 14px; background: white; transition: 0.3s;
-        }
-        input:focus { border-color: #000; outline: none; background: #fff; }
+        input { padding: 12px 15px; border: 1px solid #ccc; border-radius: 20px; font-size: 14px; background: white; transition: 0.3s; width: 100%; box-sizing: border-box; }
+        input:focus { border-color: #000; outline: none; }
+        input:disabled { background: #eee; cursor: not-allowed; }
 
         .botones-container { display: flex; flex-direction: column; gap: 10px; }
-        .boton-estilo {
-            padding: 14px; border-radius: 30px; border: 1px solid #ccc;
-            background: white; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s;
-        }
+        .boton-estilo { padding: 14px; border-radius: 30px; border: 1px solid #ccc; background: white; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; }
         .boton-principal { background: black; color: white; border: none; }
-        .boton-principal:hover { opacity: 0.85; }
 
-        #resultados {
-            margin-top: 25px; padding: 20px; background: white;
-            border-radius: 25px; border: 1px solid #ddd; display: none;
-        }
+        #resultados { margin-top: 25px; padding: 20px; background: white; border-radius: 25px; border: 1px solid #ddd; display: none; }
         .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; }
         .res-item { border-bottom: 1px solid #eee; padding: 5px 0; display: flex; justify-content: space-between; }
-        .res-item span:last-child { font-weight: 700; }
+        .res-item.highlight { color: #d32f2f; font-weight: 700; border-bottom: 2px solid #ffcdd2; }
 
-        #visualizacion {
-            margin-top: 20px; text-align: center; background: white;
-            border-radius: 25px; padding: 20px; border: 1px solid #ddd;
-        }
+        #visualizacion { margin-top: 20px; text-align: center; background: white; border-radius: 25px; padding: 20px; border: 1px solid #ddd; display: none; }
 
-        @media (max-width: 600px) {
-            .grid-inputs { grid-template-columns: 1fr 1fr; }
-        }
+        @media (max-width: 600px) { .grid-inputs { grid-template-columns: 1fr 1fr; } }
     </style>
 </head>
 <body>
@@ -103,112 +70,143 @@
         </div>
 
         <div class="reference-box">
-            <span class="reference-title">Guía de referencia</span>
-            <svg width="200" height="120" viewBox="0 0 200 120">
-                <path d="M40,100 L160,100 L60,30 Z" fill="none" stroke="#666" stroke-width="2" stroke-linejoin="round"/>
-                <text x="100" y="115" font-size="12" font-weight="bold" text-anchor="middle">c</text>
-                <text x="35" y="65" font-size="12" font-weight="bold">b</text>
-                <text x="120" y="60" font-size="12" font-weight="bold">a</text>
-                <text x="60" y="95" font-size="11" fill="#888">α</text>
-                <text x="135" y="95" font-size="11" fill="#888">β</text>
-                <text x="65" y="50" font-size="11" fill="#888">γ</text>
-            </svg>
+            <span class="reference-title">Diagrama de Referencia</span>
+            <svg id="ref-svg" width="220" height="120" viewBox="0 0 200 120">
+                </svg>
         </div>
 
         <div class="grid-inputs">
             <div class="input-group">
-                <label>Lado a</label>
-                <input type="number" id="val-a" placeholder="Eje">
+                <label id="label-a">Lado a (Cateto)</label>
+                <input type="number" id="val-a" step="any">
             </div>
             <div class="input-group">
-                <label>Lado b</label>
-                <input type="number" id="val-b" placeholder="Eje">
+                <label id="label-b">Lado b (Hipotenusa)</label>
+                <input type="number" id="val-b" step="any">
             </div>
             <div class="input-group">
-                <label>Lado c (Base)</label>
-                <input type="number" id="val-c" placeholder="Eje">
+                <label id="label-c">Lado c (Cateto)</label>
+                <input type="number" id="val-c" step="any">
             </div>
             <div class="input-group">
                 <label>Ángulo α (Alfa)</label>
-                <input type="number" id="val-alpha" placeholder="°">
+                <input type="number" id="val-alpha" placeholder="°" step="any">
             </div>
             <div class="input-group">
                 <label>Ángulo β (Beta)</label>
-                <input type="number" id="val-beta" placeholder="°">
+                <input type="number" id="val-beta" value="90" disabled step="any">
             </div>
             <div class="input-group">
                 <label>Ángulo γ (Gamma)</label>
-                <input type="number" id="val-gamma" placeholder="°" disabled>
+                <input type="number" id="val-gamma" placeholder="°" step="any">
             </div>
         </div>
 
         <div class="botones-container">
-            <button onclick="resolver()" class="boton-estilo boton-principal">Calcular Triángulo</button>
-            <button onclick="limpiar()" class="boton-estilo">Limpiar Todo</button>
+            <button onclick="resolver()" class="boton-estilo boton-principal">Calcular Resultados</button>
+            <button onclick="limpiar()" class="boton-estilo">Limpiar Campos</button>
         </div>
 
         <div id="resultados">
             <div class="res-grid" id="res-content"></div>
         </div>
 
-        <div id="visualizacion" style="display:none;">
+        <div id="visualizacion">
             <svg id="svg-draw" width="300" height="200"></svg>
         </div>
     </div>
 </div>
 
 <script>
-    let currentMode = 'rect';
+    let mode = 'rect';
 
-    function setMode(mode) {
-        currentMode = mode;
+    function setMode(newMode) {
+        mode = newMode;
         document.getElementById('mode-rect').classList.toggle('active', mode === 'rect');
         document.getElementById('mode-obli').classList.toggle('active', mode === 'obli');
         
-        const gammaInput = document.getElementById('val-gamma');
+        const betaInput = document.getElementById('val-beta');
+        const lb = document.getElementById('label-b');
+        const la = document.getElementById('label-a');
+        const lc = document.getElementById('label-c');
+
         if (mode === 'rect') {
-            gammaInput.value = 90;
-            gammaInput.disabled = true;
-            gammaInput.style.background = "#eee";
+            betaInput.value = 90;
+            betaInput.disabled = true;
+            lb.innerText = "Lado b (Hipotenusa)";
+            la.innerText = "Lado a (Cateto)";
+            lc.innerText = "Lado c (Cateto)";
         } else {
-            gammaInput.value = "";
-            gammaInput.disabled = false;
-            gammaInput.style.background = "white";
+            betaInput.value = "";
+            betaInput.disabled = false;
+            lb.innerText = "Lado b";
+            la.innerText = "Lado a";
+            lc.innerText = "Lado c";
         }
+        updateRefDiagram();
         limpiar();
     }
 
-    function toRad(deg) { return deg * (Math.PI / 180); }
-    function toDeg(rad) { return rad * (180 / Math.PI); }
+    function updateRefDiagram() {
+        const svg = document.getElementById('ref-svg');
+        if (mode === 'rect') {
+            svg.innerHTML = `
+                <path d="M40,20 L40,100 L160,100 Z" fill="none" stroke="#666" stroke-width="2"/>
+                <rect x="40" y="85" width="15" height="15" fill="none" stroke="#ccc"/>
+                <text x="30" y="60" font-size="12" font-weight="bold">a</text>
+                <text x="100" y="115" font-size="12" font-weight="bold">c</text>
+                <text x="110" y="55" font-size="12" font-weight="bold">b</text>
+                <text x="50" y="35" font-size="11" fill="#888">γ</text>
+                <text x="45" y="95" font-size="11" fill="#888">β</text>
+                <text x="135" y="95" font-size="11" fill="#888">α</text>
+            `;
+        } else {
+            svg.innerHTML = `
+                <path d="M40,100 L160,100 L100,30 Z" fill="none" stroke="#666" stroke-width="2"/>
+                <text x="65" y="65" font-size="12" font-weight="bold">b</text>
+                <text x="135" y="65" font-size="12" font-weight="bold">a</text>
+                <text x="100" y="115" font-size="12" font-weight="bold">c</text>
+                <text x="55" y="95" font-size="11" fill="#888">α</text>
+                <text x="145" y="95" font-size="11" fill="#888">β</text>
+                <text x="100" y="45" font-size="11" fill="#888">γ</text>
+            `;
+        }
+    }
+
+    const toRad = (d) => d * Math.PI / 180;
+    const toDeg = (r) => r * 180 / Math.PI;
 
     function resolver() {
-        let a = parseFloat(document.getElementById('val-a').value);
-        let b = parseFloat(document.getElementById('val-b').value);
-        let c = parseFloat(document.getElementById('val-c').value);
-        let A = parseFloat(document.getElementById('val-alpha').value);
-        let B = parseFloat(document.getElementById('val-beta').value);
-        let G = parseFloat(document.getElementById('val-gamma').value);
+        let a = parseFloat(document.getElementById('val-a').value) || null;
+        let b = parseFloat(document.getElementById('val-b').value) || null;
+        let c = parseFloat(document.getElementById('val-c').value) || null;
+        let A = parseFloat(document.getElementById('val-alpha').value) || null;
+        let B = parseFloat(document.getElementById('val-beta').value) || (mode === 'rect' ? 90 : null);
+        let G = parseFloat(document.getElementById('val-gamma').value) || null;
 
-        // Lógica simplificada de resolución (Seno y Coseno)
-        // Intentamos completar ángulos primero
-        if (A && B && !G) G = 180 - A - B;
-        if (A && G && !B) B = 180 - A - G;
-        if (B && G && !A) A = 180 - B - G;
+        // Intentar resolver hasta 5 veces para completar variables dependientes
+        for (let i = 0; i < 5; i++) {
+            // 1. Suma de ángulos
+            if (A && B && !G) G = 180 - A - B;
+            if (A && G && !B) B = 180 - A - G;
+            if (B && G && !A) A = 180 - B - G;
 
-        // Ley de Cosenos para lados si tenemos LAL o LLL
-        if (a && b && G && !c) c = Math.sqrt(a*a + b*b - 2*a*b*Math.cos(toRad(G)));
-        if (a && c && B && !b) b = Math.sqrt(a*a + c*c - 2*a*c*Math.cos(toRad(B)));
-        if (b && c && A && !a) a = Math.sqrt(b*b + c*c - 2*b*c*Math.cos(toRad(A)));
-        
-        if (a && b && c && !A) A = toDeg(Math.acos((b*b + c*c - a*a)/(2*b*c)));
-        if (a && b && c && !B) B = toDeg(Math.acos((a*a + c*c - b*b)/(2*a*c)));
-        if (a && b && c && !G) G = 180 - A - B;
+            // 2. Ley de Cosenos (Lados)
+            if (a && c && B && !b) b = Math.sqrt(a*a + c*c - 2*a*c*Math.cos(toRad(B)));
+            if (b && c && A && !a) a = Math.sqrt(b*b + c*c - 2*b*c*Math.cos(toRad(A)));
+            if (a && b && G && !c) c = Math.sqrt(a*a + b*b - 2*a*b*Math.cos(toRad(G)));
 
-        // Ley de Senos para completar
-        for(let i=0; i<2; i++) { // Doble pasada para asegurar completitud
+            // 3. Ley de Cosenos (Ángulos)
+            if (a && b && c) {
+                if (!A) A = toDeg(Math.acos((b*b + c*c - a*a) / (2*b*c)));
+                if (!B) B = toDeg(Math.acos((a*a + c*c - b*b) / (2*a*c)));
+                if (!G) G = toDeg(Math.acos((a*a + b*b - c*c) / (2*a*b)));
+            }
+
+            // 4. Ley de Senos
             if (a && A) {
                 if (B && !b) b = a * Math.sin(toRad(B)) / Math.sin(toRad(A));
-                if (G && !g) g = a * Math.sin(toRad(G)) / Math.sin(toRad(A));
+                if (G && !c) c = a * Math.sin(toRad(G)) / Math.sin(toRad(A));
             }
             if (b && B) {
                 if (A && !a) a = b * Math.sin(toRad(A)) / Math.sin(toRad(B));
@@ -220,31 +218,33 @@
             }
         }
 
-        if (isNaN(a) || isNaN(A)) {
-            alert("Datos insuficientes o triángulo imposible.");
+        if (!a || !b || !c || isNaN(a)) {
+            alert("Por favor ingresa al menos 3 valores (incluyendo un lado).");
             return;
         }
 
-        mostrarResultados(a, b, c, A, B, G);
+        mostrar(a, b, c, A, B, G);
         dibujar(a, b, c, A, B, G);
     }
 
-    function mostrarResultados(a, b, c, A, B, G) {
+    function mostrar(a, b, c, A, B, G) {
         const res = document.getElementById('resultados');
-        const content = document.getElementById('res-content');
         res.style.display = 'block';
-        
-        const items = [
-            {n: "Lado a", v: a}, {n: "Ángulo α", v: A + "°"},
-            {n: "Lado b", v: b}, {n: "Ángulo β", v: B + "°"},
-            {n: "Lado c", v: c}, {n: "Ángulo γ", v: G + "°"},
-            {n: "Perímetro", v: (a+b+c).toFixed(2)},
-            {n: "Área", v: (0.5 * a * b * Math.sin(toRad(G))).toFixed(2)}
-        ];
+        const content = document.getElementById('res-content');
 
-        content.innerHTML = items.map(i => `
-            <div class="res-item"><span>${i.n}</span><span>${typeof i.v === 'number' ? i.v.toFixed(2) : i.v}</span></div>
-        `).join('');
+        const area = 0.5 * a * c * Math.sin(toRad(B));
+
+        let html = `
+            <div class="res-item"><span>Lado a:</span><span>${a.toFixed(2)}</span></div>
+            <div class="res-item ${mode==='rect'?'highlight':''}"><span>Lado b ${mode==='rect'?'(Hipotenusa)':''}:</span><span>${b.toFixed(2)}</span></div>
+            <div class="res-item"><span>Lado c:</span><span>${c.toFixed(2)}</span></div>
+            <div class="res-item"><span>Ángulo α:</span><span>${A.toFixed(2)}°</span></div>
+            <div class="res-item"><span>Ángulo β:</span><span>${B.toFixed(2)}°</span></div>
+            <div class="res-item"><span>Ángulo γ:</span><span>${G.toFixed(2)}°</span></div>
+            <div class="res-item"><span>Área:</span><span>${area.toFixed(2)}</span></div>
+            <div class="res-item"><span>Perímetro:</span><span>${(a+b+c).toFixed(2)}</span></div>
+        `;
+        content.innerHTML = html;
     }
 
     function dibujar(a, b, c, A, B, G) {
@@ -253,39 +253,35 @@
         box.style.display = 'block';
         svg.innerHTML = '';
 
-        const scale = 150 / Math.max(a, b, c);
-        const sC = c * scale;
-        
-        // Coordenadas
-        const x1 = 20, y1 = 170; // Vértice A (izq)
-        const x2 = x1 + sC, y2 = 170; // Vértice B (der)
-        
-        // Vértice C usando coordenadas polares desde A
-        const x3 = x1 + b * scale * Math.cos(toRad(A));
-        const y3 = y1 - b * scale * Math.sin(toRad(A));
+        const scale = 180 / Math.max(a, b, c);
+        const sA = a * scale, sB = b * scale, sC = c * scale;
 
-        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.setAttribute("d", `M${x1},${y1} L${x2},${y2} L${x3},${y3} Z`);
-        path.setAttribute("fill", "#00000010");
-        path.setAttribute("stroke", "black");
-        path.setAttribute("stroke-width", "2");
-        svg.appendChild(path);
-        
-        // Marca de agua
+        const x1 = 50, y1 = 150; // Punto A
+        const x2 = x1 + sC, y2 = 150; // Punto B
+        const x3 = x1 + sA * Math.cos(toRad(180 - B));
+        const y3 = y1 - sA * Math.sin(toRad(180 - B));
+
+        const poly = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        poly.setAttribute("d", `M${x1},${y1} L${x2},${y2} L${x3},${y3} Z`);
+        poly.setAttribute("fill", "#00000008");
+        poly.setAttribute("stroke", "black");
+        poly.setAttribute("stroke-width", "2");
+        svg.appendChild(poly);
+
         const water = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        water.setAttribute("x", "280"); water.setAttribute("y", "190");
+        water.setAttribute("x", "290"); water.setAttribute("y", "190");
         water.setAttribute("text-anchor", "end"); water.setAttribute("font-size", "10");
         water.setAttribute("fill", "#ccc"); water.textContent = "√(Raiz) Cuadrada²";
         svg.appendChild(water);
     }
 
     function limpiar() {
-        document.querySelectorAll('input:not(#val-gamma)').forEach(i => i.value = '');
-        if(currentMode === 'obli') document.getElementById('val-gamma').value = '';
+        document.querySelectorAll('input:not(#val-beta)').forEach(i => i.value = '');
         document.getElementById('resultados').style.display = 'none';
         document.getElementById('visualizacion').style.display = 'none';
     }
-</script>
 
+    updateRefDiagram();
+</script>
 </body>
 </html>
