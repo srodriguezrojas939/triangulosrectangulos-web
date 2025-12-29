@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Triángulos - Raiz Cuadrada</title>
+
+    <style>
+        /* --- ESTÉTICA ORIGINAL MANTENIDA --- */
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
+
+        .fade-in { opacity: 0; transform: translateY(25px); animation: fadeUp 0.9s ease forwards; }
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+        body { background: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+
+        .calculadora-moderna {
+            max-width: 650px; width: 100%; padding: 40px 30px;
+            background: #F2F2F2; border-radius: 35px;
+            font-family: 'Open Sans', sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+
+        .header-section { text-align: center; margin-bottom: 25px; }
+        .header-section h1 { font-size: 28px; margin: 0; font-family: 'Playfair Display', serif; }
+        .header-section p { font-size: 18px; font-weight: 600; color: #333; font-family: 'Playfair Display', serif; margin: 5px 0; }
+
+        label { display: block; font-size: 12px; margin-bottom: 5px; margin-left: 10px; font-weight: 700; color: #555; text-transform: uppercase; }
+
+        .grid-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .input-group { position: relative; }
+
+        input {
+            font-family: 'Open Sans', sans-serif; font-size: 14px;
+            padding: 12px 15px; border: 1px solid #ccc; border-radius: 25px;
+            background: white; box-sizing: border-box; transition: 0.3s;
+            width: 100%;
+        }
+
+        input:focus { border-color: #000; outline: none; }
+
+        .botones-container { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        
+        .boton-estilo {
+            display: flex; align-items: center; justify-content: center;
+            background: white; border: 1px solid #ccc; border-radius: 30px;
+            padding: 12px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.3s;
+        }
+        
+        .boton-principal { background: black; color: white; border: none; }
+        .boton-principal:hover { opacity: 0.8; }
+
+        #contenedor-grafica {
+            margin-top: 25px; background: white; border-radius: 25px;
+            padding: 20px; border: 1px solid #ddd; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 250px;
+        }
+
+        #info-box { 
+            margin-top: 20px; 
+            padding: 15px;
+            background: #fff;
+            border-radius: 20px;
+            font-size: 13px; 
+            color: #333;
+            border: 1px solid #eee;
+        }
+
+        .resultado-item { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px solid #f9f9f9; padding-bottom: 3px; }
+        .resultado-val { font-weight: 700; }
+
+        @media (max-width: 500px) {
+            .grid-inputs { grid-template-columns: 1fr; }
+            .header-section h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="fade-in" style="width: 100%; display: flex; justify-content: center;">
+    <div class="calculadora-moderna">
+        <div class="header-section">
+            <h1>Calculadora de Triángulos</h1>
+            <p>√(Raiz) Cuadrada²</p>
+        </div>
+
+        <p style="font-size: 12px; text-align: center; color: #777; margin-bottom: 20px;">Ingrese al menos dos valores (un lado obligatorio)</p>
+
+        <div class="grid-inputs">
+            <div class="input-group">
+                <label>Cateto (a)</label>
+                <input type="number" id="side-a" placeholder="Lado vertical" step="any">
+            </div>
+            <div class="input-group">
+                <label>Cateto (b)</label>
+                <input type="number" id="side-b" placeholder="Lado horizontal" step="any">
+            </div>
+            <div class="input-group">
+                <label>Hipotenusa (c)</label>
+                <input type="number" id="side-c" placeholder="Lado largo" step="any">
+            </div>
+            <div class="input-group">
+                <label>Ángulo α (°)</label>
+                <input type="number" id="angle-a" placeholder="Opuesto a 'a'" step="any">
+            </div>
+        </div>
+
+        <div class="botones-container">
+            <button onclick="calcular()" class="boton-estilo boton-principal">Calcular y Graficar</button>
+            <button onclick="limpiar()" class="boton-estilo">Limpiar Datos</button>
+            <button onclick="exportarImagen()" class="boton-estilo">
+                <img src="https://cdn-icons-png.flaticon.com/512/724/724933.png" width="16" style="margin-right:8px"> 
+                Descargar PNG
+            </button>
+        </div>
+
+        <div id="info-box" style="display:none;"></div>
+
+        <div id="contenedor-grafica">
+            <svg id="svg-triangulo" width="300" height="250" viewBox="0 0 300 250"></svg>
+        </div>
+    </div>
+</div>
+
+<canvas id="canvas-export" style="display:none;"></canvas>
+
+<script>
+function calcular() {
+    let a = parseFloat(document.getElementById('side-a').value);
+    let b = parseFloat(document.getElementById('side-b').value);
+    let c = parseFloat(document.getElementById('side-c').value);
+    let angA = parseFloat(document.getElementById('angle-a').value); // En grados
+
+    // Lógica de resolución de triángulo rectángulo
+    if (a && b) {
+        c = Math.sqrt(a*a + b*b);
+        angA = Math.atan(a/b) * (180/Math.PI);
+    } else if (a && c) {
+        b = Math.sqrt(c*c - a*a);
+        angA = Math.asin(a/c) * (180/Math.PI);
+    } else if (b && c) {
+        a = Math.sqrt(c*c - b*b);
+        angA = Math.acos(b/c) * (180/Math.PI);
+    } else if (a && angA) {
+        let rad = angA * (Math.PI/180);
+        c = a / Math.sin(rad);
+        b = a / Math.tan(rad);
+    } else if (b && angA) {
+        let rad = angA * (Math.PI/180);
+        a = b * Math.tan(rad);
+        c = b / Math.cos(rad);
+    } else if (c && angA) {
+        let rad = angA * (Math.PI/180);
+        a = c * Math.sin(rad);
+        b = c * Math.cos(rad);
+    } else {
+        alert("Por favor, ingrese al menos dos valores válidos.");
+        return;
+    }
+
+    let angB = 90 - angA;
+    let area = (a * b) / 2;
+    let perimetro = a + b + c;
+
+    mostrarResultados(a, b, c, angA, angB, area, perimetro);
+    dibujarTriangulo(a, b);
+}
+
+function mostrarResultados(a, b, c, angA, angB, area, perimetro) {
+    const box = document.getElementById('info-box');
+    box.style.display = 'block';
+    box.innerHTML = `
+        <div class="resultado-item"><span>Cateto a:</span> <span class="resultado-val">${a.toFixed(2)}</span></div>
+        <div class="resultado-item"><span>Cateto b:</span> <span class="resultado-val">${b.toFixed(2)}</span></div>
+        <div class="resultado-item"><span>Hipotenusa c:</span> <span class="resultado-val">${c.toFixed(2)}</span></div>
+        <div class="resultado-item"><span>Ángulo α:</span> <span class="resultado-val">${angA.toFixed(2)}°</span></div>
+        <div class="resultado-item"><span>Ángulo β:</span> <span class="resultado-val">${angB.toFixed(2)}°</span></div>
+        <div class="resultado-item" style="border:none; margin-top:10px; color:black;"><span>Área:</span> <span class="resultado-val">${area.toFixed(2)} u²</span></div>
+        <div class="resultado-item" style="border:none;"><span>Perímetro:</span> <span class="resultado-val">${perimetro.toFixed(2)} u</span></div>
+    `;
+}
+
+function dibujarTriangulo(a, b) {
+    const svg = document.getElementById('svg-triangulo');
+    svg.innerHTML = '';
+    
+    // Escalamiento para que quepa en el cuadro
+    const maxVal = Math.max(a, b);
+    const scale = 180 / maxVal;
+    const sa = a * scale;
+    const sb = b * scale;
+
+    // Coordenadas (Triángulo rectángulo con ángulo recto en el origen visual abajo-izquierda)
+    const margin = 40;
+    const p1 = { x: margin, y: 220 };          // Vértice ángulo recto
+    const p2 = { x: margin + sb, y: 220 };     // Vértice derecho
+    const p3 = { x: margin, y: 220 - sa };     // Vértice superior
+
+    // Dibujar líneas
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y} L ${p3.x} ${p3.y} Z`);
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", "black");
+    path.setAttribute("stroke-width", "2");
+    svg.appendChild(path);
+
+    // Símbolo ángulo recto
+    const square = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    square.setAttribute("x", p1.x);
+    square.setAttribute("y", p1.y - 15);
+    square.setAttribute("width", "15");
+    square.setAttribute("height", "15");
+    square.setAttribute("fill", "none");
+    square.setAttribute("stroke", "#ccc");
+    svg.appendChild(square);
+
+    // Etiquetas de lados
+    const labelA = crearTexto(p1.x - 25, p1.y - sa/2, "a");
+    const labelB = crearTexto(p1.x + sb/2, p1.y + 20, "b");
+    const labelC = crearTexto(p1.x + sb/2 + 10, p1.y - sa/2 - 10, "c");
+    
+    svg.appendChild(labelA);
+    svg.appendChild(labelB);
+    svg.appendChild(labelC);
+}
+
+function crearTexto(x, y, txt) {
+    const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    t.setAttribute("x", x);
+    t.setAttribute("y", y);
+    t.setAttribute("font-family", "Open Sans");
+    t.setAttribute("font-weight", "bold");
+    t.setAttribute("font-size", "14px");
+    t.textContent = txt;
+    return t;
+}
+
+function limpiar() {
+    document.querySelectorAll('input').forEach(i => i.value = '');
+    document.getElementById('info-box').style.display = 'none';
+    document.getElementById('svg-triangulo').innerHTML = '';
+}
+
+function exportarImagen() {
+    const svgElement = document.getElementById('svg-triangulo');
+    const canvas = document.getElementById('canvas-export');
+    const ctx = canvas.getContext('2d');
+    const svgData = new XMLSerializer().serializeToString(svgElement);
+    const img = new Image();
+    
+    canvas.width = 600; 
+    canvas.height = 500;
+
+    img.onload = function() {
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Dibujar el SVG escalado
+        ctx.drawImage(img, 50, 50, 500, 400);
+
+        // Marca de agua estética requerida
+        ctx.font = "bold 30px 'Playfair Display'";
+        ctx.fillStyle = "rgba(0,0,0,0.2)";
+        ctx.textAlign = "right";
+        ctx.fillText("√(Raiz) Cuadrada²", canvas.width - 30, canvas.height - 30);
+        
+        const link = document.createElement('a');
+        link.download = 'triangulo-raiz-cuadrada.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    };
+    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+}
+</script>
+</body>
+</html>
