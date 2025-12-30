@@ -43,7 +43,7 @@
         .reference-title { font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; margin-bottom: 10px; }
 
         /* Mensaje de Info de Datos */
-        #data-status { font-size: 12px; color: #888; text-align: center; margin-bottom: 15px; min-height: 18px; }
+        #data-status { font-size: 13px; color: #888; text-align: center; margin-bottom: 15px; min-height: 20px; font-weight: 600; }
 
         .grid-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
         .input-group { display: flex; flex-direction: column; }
@@ -61,7 +61,9 @@
         .res-item { border-bottom: 1px solid #eee; padding: 5px 0; display: flex; justify-content: space-between; }
         .res-item span:last-child { font-weight: 700; }
 
-        #visualizacion { margin-top: 20px; text-align: center; background: white; border-radius: 25px; padding: 20px; border: 1px solid #ddd; display: none; position: relative; }
+        /* Aumentado el alto para evitar cortes */
+        #visualizacion { margin-top: 20px; text-align: center; background: white; border-radius: 25px; padding: 20px; border: 1px solid #ddd; display: none; position: relative; height: 300px; display: flex; justify-content: center; align-items: center; }
+        #svg-draw { width: 100%; height: 100%; }
 
         @media (max-width: 600px) { .grid-inputs { grid-template-columns: 1fr 1fr; } }
     </style>
@@ -129,8 +131,8 @@
             <div class="res-grid" id="res-content"></div>
         </div>
 
-        <div id="visualizacion">
-            <svg id="svg-draw" width="350" height="250" viewBox="0 0 350 250"></svg>
+        <div id="visualizacion" style="display:none;">
+            <svg id="svg-draw" viewBox="0 0 350 300"></svg>
         </div>
     </div>
 </div>
@@ -199,7 +201,8 @@
 
         if (llenos.length >= limite) {
             status.innerText = "Con esta cantidad de datos es suficiente";
-            status.style.color = "#4CAF50";
+            // Cambio de color a gris oscuro
+            status.style.color = "#555";
             IDs.forEach(id => {
                 const el = document.getElementById(id);
                 if (el.value === "") el.disabled = true;
@@ -219,25 +222,32 @@
         let B = parseFloat(document.getElementById('val-beta').value) || (mode === 'rect' ? 90 : null);
         let G = parseFloat(document.getElementById('val-gamma').value) || null;
 
-        // Validaciones Geométricas Críticas
-        if (A + B + G > 180.01) { alert("Error: La suma de los ángulos no puede superar los 180°."); return; }
-        if (mode === 'rect' && a && b && c) {
-            if (Math.abs(a*a + c*c - b*b) > 0.1) { alert("Error: Los lados no cumplen el Teorema de Pitágoras."); return; }
+        // Validación inicial de ángulos
+        if ((A && A>=180) || (B && B>=180) || (G && G>=180) || (A+B+G >= 180.01 && A&&B&&G)) {
+            alert("Error: Ángulos no válidos para un triángulo."); return;
         }
 
         // Motor Matemático
         for (let i = 0; i < 6; i++) {
+            // Ángulos
             if (A && B && !G) G = 180 - A - B;
             if (A && G && !B) B = 180 - A - G;
             if (B && G && !A) A = 180 - B - G;
+
+            // Ley de Cosenos (para hallar lado)
             if (a && c && B && !b) b = Math.sqrt(a*a + c*c - 2*a*c*Math.cos(toRad(B)));
             if (b && c && A && !a) a = Math.sqrt(b*b + c*c - 2*b*c*Math.cos(toRad(A)));
             if (a && b && G && !c) c = Math.sqrt(a*a + b*b - 2*a*b*Math.cos(toRad(G)));
+
+            // Ley de Cosenos (para hallar ángulo)
             if (a && b && c) {
+                // Validación de desigualdad triangular
+                if(a+b<=c || a+c<=b || b+c<=a) { alert("Error: No forma un triángulo válido."); return; }
                 if (!A) A = toDeg(Math.acos((b*b + c*c - a*a) / (2*b*c)));
                 if (!B) B = toDeg(Math.acos((a*a + c*c - b*b) / (2*a*c)));
                 if (!G) G = 180 - (A || 0) - (B || 0);
             }
+            // Ley de Senos
             if (a && A) {
                 if (B && !b) b = a * Math.sin(toRad(B)) / Math.sin(toRad(A));
                 if (G && !c) c = a * Math.sin(toRad(G)) / Math.sin(toRad(A));
@@ -252,7 +262,17 @@
             }
         }
 
-        if (!a || isNaN(a) || G <= 0 || A <= 0 || B <= 0) { alert("Error: Triángulo imposible o datos inconsistentes."); return; }
+        // Validación final de Pitágoras para rectángulos
+        if (mode === 'rect' && a && b && c) {
+            // Margen de error pequeño por decimales
+            if (Math.abs(a*a + c*c - b*b) > 0.5) { 
+                alert("Error: Los datos no corresponden a un triángulo rectángulo válido (Pitágoras falla)."); return; 
+            }
+        }
+
+        if (!a || isNaN(a) || a<=0 || b<=0 || c<=0 || G <= 0 || A <= 0 || B <= 0) { 
+            alert("Error: Triángulo imposible o datos inconsistentes."); return; 
+        }
 
         mostrar(a, b, c, A, B, G);
         dibujar(a, b, c, A, B, G);
@@ -279,29 +299,48 @@
         const svg = document.getElementById('svg-draw');
         document.getElementById('visualizacion').style.display = 'block';
         svg.innerHTML = '';
-        const scale = 180 / Math.max(a, b, c);
-        const sA = a * scale, sB = b * scale, sC = c * scale;
 
-        const xB = 50, yB = 180;
-        const xA = xB + sC, yA = 180;
-        const xG = xB + sA * Math.cos(toRad(180-B));
-        const yG = yB - sA * Math.sin(toRad(180-B));
+        // 1. Calcular vértices sin escalar
+        const vB = {x: 0, y: 0}; // Beta en el origen
+        const vA = {x: c, y: 0}; // Alpha sobre el eje X
+        const vG = {x: a * Math.cos(toRad(180-B)), y: a * Math.sin(toRad(180-B))}; // Gamma
+
+        // 2. Encontrar bounding box
+        const minX = Math.min(vB.x, vA.x, vG.x);
+        const maxX = Math.max(vB.x, vA.x, vG.x);
+        const minY = Math.min(vB.y, vA.y, vG.y);
+        const maxY = Math.max(vB.y, vA.y, vG.y);
+        const triW = maxX - minX;
+        const triH = maxY - minY;
+
+        // 3. Calcular escala y offsets para centrar
+        const svgW = 350, svgH = 300;
+        const margin = 40;
+        const scale = Math.min((svgW - margin*2) / triW, (svgH - margin*2) / triH);
+        const offsetX = (svgW - triW * scale) / 2 - minX * scale;
+        const offsetY = (svgH - triH * scale) / 2 - minY * scale;
+
+        // 4. Aplicar transformación a los puntos
+        const pB = {x: vB.x*scale + offsetX, y: svgH - (vB.y*scale + offsetY)};
+        const pA = {x: vA.x*scale + offsetX, y: svgH - (vA.y*scale + offsetY)};
+        const pG = {x: vG.x*scale + offsetX, y: svgH - (vG.y*scale + offsetY)};
 
         const tri = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        tri.setAttribute("d", `M${xB},${yB} L${xA},${yA} L${xG},${yG} Z`);
+        tri.setAttribute("d", `M${pB.x},${pB.y} L${pA.x},${pA.y} L${pG.x},${pG.y} Z`);
         tri.setAttribute("fill", "#00000005"); tri.setAttribute("stroke", "black"); tri.setAttribute("stroke-width", "2");
         svg.appendChild(tri);
 
-        // Etiquetas Grises
-        svg.appendChild(crearTxt((xB+xA)/2, yB+20, c.toFixed(1), "#888", "12px", "bold"));
-        svg.appendChild(crearTxt((xB+xG)/2-25, (yB+yG)/2, a.toFixed(1), "#888", "12px", "bold"));
-        svg.appendChild(crearTxt((xA+xG)/2+20, (yA+yG)/2, b.toFixed(1), "#888", "12px", "bold"));
-        svg.appendChild(crearTxt(xA-25, yA-10, A.toFixed(0)+"°", "#aaa", "10px"));
-        svg.appendChild(crearTxt(xB+15, yB-10, B.toFixed(0)+"°", "#aaa", "10px"));
-        svg.appendChild(crearTxt(xG, yG+20, G.toFixed(0)+"°", "#aaa", "10px"));
+        // Etiquetas
+        svg.appendChild(crearTxt((pB.x+pA.x)/2, pB.y + 20, c.toFixed(1), "#888", "12px", "bold"));
+        svg.appendChild(crearTxt((pB.x+pG.x)/2-25, (pB.y+pG.y)/2, a.toFixed(1), "#888", "12px", "bold"));
+        svg.appendChild(crearTxt((pA.x+pG.x)/2+20, (pA.y+pG.y)/2, b.toFixed(1), "#888", "12px", "bold"));
+
+        svg.appendChild(crearTxt(pA.x-25, pA.y-10, A.toFixed(0)+"°", "#aaa", "10px"));
+        svg.appendChild(crearTxt(pB.x+15, pB.y-10, B.toFixed(0)+"°", "#aaa", "10px"));
+        svg.appendChild(crearTxt(pG.x, pG.y-15, G.toFixed(0)+"°", "#aaa", "10px"));
 
         const water = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        water.setAttribute("x", "340"); water.setAttribute("y", "240");
+        water.setAttribute("x", svgW - 20); water.setAttribute("y", svgH - 20);
         water.setAttribute("text-anchor", "end"); water.setAttribute("font-family", "Playfair Display");
         water.setAttribute("font-weight", "bold"); water.setAttribute("font-size", "12");
         water.setAttribute("fill", "#bbb"); water.textContent = "√(Raiz) Cuadrada²";
@@ -320,13 +359,15 @@
         const svg = document.getElementById('svg-draw');
         const canvas = document.getElementById('export-canvas');
         const ctx = canvas.getContext('2d');
+        // Serializar con el viewBox correcto
+        svg.setAttribute('width', '700'); svg.setAttribute('height', '600');
         const xml = new XMLSerializer().serializeToString(svg);
         const svg64 = btoa(unescape(encodeURIComponent(xml)));
         const img = new Image();
-        canvas.width = 700; canvas.height = 500;
+        canvas.width = 700; canvas.height = 600;
         img.onload = function() {
             ctx.fillStyle = "white"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0, 700, 500);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             const link = document.createElement('a');
             link.download = 'triangulo-raiz-cuadrada.png';
             link.href = canvas.toDataURL(); link.click();
