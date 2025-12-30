@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora triangulos - √(Raiz) Cuadrada²</title>
+    <title>Calculadora Maestra - √(Raiz) Cuadrada²</title>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Open+Sans:wght@400;600;700&display=swap');
@@ -42,18 +42,15 @@
         .reference-box { background: white; border-radius: 20px; padding: 15px; margin-bottom: 25px; border: 1px solid #ddd; display: flex; flex-direction: column; align-items: center; }
         .reference-title { font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; margin-bottom: 10px; }
 
-        .warning-box { 
-            background: #fff4e5; border: 1px solid #ffa117; border-radius: 15px; 
-            padding: 10px 15px; margin-bottom: 20px; font-size: 13px; color: #663c00; 
-            display: none; text-align: center; font-weight: 600;
-        }
+        /* Mensaje de Info de Datos */
+        #data-status { font-size: 12px; color: #888; text-align: center; margin-bottom: 15px; min-height: 18px; }
 
         .grid-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
         .input-group { display: flex; flex-direction: column; }
-        label { font-size: 11px; font-weight: 700; margin-bottom: 5px; margin-left: 10px; color: #555; }
+        label { font-size: 12px; font-weight: 400; margin-bottom: 5px; margin-left: 10px; color: #555; }
         input { padding: 12px 15px; border: 1px solid #ccc; border-radius: 20px; font-size: 14px; background: white; transition: 0.3s; width: 100%; box-sizing: border-box; font-family: 'Open Sans', sans-serif; }
         input:focus { border-color: #000; outline: none; }
-        input:disabled { background: #eee; cursor: not-allowed; }
+        input:disabled { background: #e9e9e9; color: #aaa; cursor: not-allowed; border-color: #ddd; }
 
         .botones-container { display: flex; flex-direction: column; gap: 10px; }
         .boton-estilo { padding: 14px; border-radius: 30px; border: 1px solid #ccc; background: white; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; font-family: 'Open Sans', sans-serif; display: flex; align-items: center; justify-content: center; }
@@ -90,32 +87,32 @@
             <svg id="ref-svg" width="220" height="120" viewBox="0 0 200 120"></svg>
         </div>
 
-        <div id="input-warning" class="warning-box"> Has introducido demasiados datos. Solo se necesitan 3 valores (uno debe ser un lado).</div>
+        <div id="data-status">Introduce los datos para comenzar</div>
 
         <div class="grid-inputs">
             <div class="input-group">
-                <label id="label-a">Lado a (Cateto)</label>
-                <input type="number" id="val-a" step="any" oninput="validarInputs()">
+                <label>Lado a (Cateto)</label>
+                <input type="number" id="val-a" step="any" oninput="controlDeEntradas()">
             </div>
             <div class="input-group">
                 <label id="label-b">Lado b (Hipotenusa)</label>
-                <input type="number" id="val-b" step="any" oninput="validarInputs()">
+                <input type="number" id="val-b" step="any" oninput="controlDeEntradas()">
             </div>
             <div class="input-group">
-                <label id="label-c">Lado c (Cateto)</label>
-                <input type="number" id="val-c" step="any" oninput="validarInputs()">
+                <label>Lado c (Cateto)</label>
+                <input type="number" id="val-c" step="any" oninput="controlDeEntradas()">
             </div>
             <div class="input-group">
                 <label>Ángulo α (Alfa)</label>
-                <input type="number" id="val-alpha" placeholder="°" step="any" oninput="validarInputs()">
+                <input type="number" id="val-alpha" placeholder="°" step="any" oninput="controlDeEntradas()">
             </div>
             <div class="input-group">
                 <label>Ángulo β (Beta)</label>
-                <input type="number" id="val-beta" value="90" disabled step="any">
+                <input type="number" id="val-beta" value="90" disabled>
             </div>
             <div class="input-group">
                 <label>Ángulo γ (Gamma)</label>
-                <input type="number" id="val-gamma" placeholder="°" step="any" oninput="validarInputs()">
+                <input type="number" id="val-gamma" placeholder="°" step="any" oninput="controlDeEntradas()">
             </div>
         </div>
 
@@ -151,14 +148,16 @@
         document.getElementById('mode-obli').classList.toggle('active', mode === 'obli');
         
         const betaInput = document.getElementById('val-beta');
+        const lb = document.getElementById('label-b');
+
         if (mode === 'rect') {
             betaInput.value = 90;
             betaInput.disabled = true;
-            document.getElementById('label-b').innerText = "Lado b (Hipotenusa)";
+            lb.innerText = "Lado b (Hipotenusa)";
         } else {
             betaInput.value = "";
             betaInput.disabled = false;
-            document.getElementById('label-b').innerText = "Lado b";
+            lb.innerText = "Lado b";
         }
         updateRefDiagram();
         limpiar();
@@ -170,39 +169,45 @@
             svg.innerHTML = `
                 <path d="M40,20 L40,100 L160,100 Z" fill="none" stroke="#666" stroke-width="2"/>
                 <rect x="40" y="85" width="15" height="15" fill="none" stroke="#ccc"/>
-                <text x="30" y="60" font-size="12" font-family="Open Sans" font-weight="bold">a</text>
-                <text x="100" y="115" font-size="12" font-family="Open Sans" font-weight="bold">c</text>
-                <text x="110" y="55" font-size="12" font-family="Open Sans" font-weight="bold">b</text>
-                <text x="50" y="35" font-size="11" fill="#888" font-family="Open Sans">γ</text>
-                <text x="45" y="95" font-size="11" fill="#888" font-family="Open Sans">β</text>
-                <text x="135" y="95" font-size="11" fill="#888" font-family="Open Sans">α</text>
+                <text x="30" y="60" font-size="12" font-family="Open Sans">a</text>
+                <text x="100" y="115" font-size="12" font-family="Open Sans">c</text>
+                <text x="110" y="55" font-size="12" font-family="Open Sans">b</text>
+                <text x="50" y="35" font-size="11" fill="#888">γ</text>
+                <text x="45" y="95" font-size="11" fill="#888">β</text>
+                <text x="135" y="95" font-size="11" fill="#888">α</text>
             `;
         } else {
             svg.innerHTML = `
                 <path d="M40,100 L160,100 L100,30 Z" fill="none" stroke="#666" stroke-width="2"/>
-                <text x="65" y="65" font-size="12" font-family="Open Sans" font-weight="bold">b</text>
-                <text x="135" y="65" font-size="12" font-family="Open Sans" font-weight="bold">a</text>
-                <text x="100" y="115" font-size="12" font-family="Open Sans" font-weight="bold">c</text>
-                <text x="55" y="95" font-size="11" fill="#888" font-family="Open Sans">α</text>
-                <text x="145" y="95" font-size="11" fill="#888" font-family="Open Sans">β</text>
-                <text x="100" y="45" font-size="11" fill="#888" font-family="Open Sans">γ</text>
+                <text x="65" y="65" font-size="12" font-family="Open Sans">b</text>
+                <text x="135" y="65" font-size="12" font-family="Open Sans">a</text>
+                <text x="100" y="115" font-size="12" font-family="Open Sans">c</text>
+                <text x="55" y="95" font-size="11" fill="#888">α</text>
+                <text x="145" y="95" font-size="11" fill="#888">β</text>
+                <text x="100" y="45" font-size="11" fill="#888">γ</text>
             `;
         }
     }
 
-    function validarInputs() {
-        const inputs = ['val-a', 'val-b', 'val-c', 'val-alpha', 'val-gamma'];
-        if (mode === 'obli') inputs.push('val-beta');
-        
-        let filled = inputs.filter(id => document.getElementById(id).value !== "").length;
-        const warning = document.getElementById('input-warning');
-        
-        const limit = (mode === 'rect') ? 2 : 3;
-        if (filled > limit) {
-            warning.style.display = 'block';
-            warning.innerText = ` Solo necesitas introducir ${limit} valores adicionales para resolver el triángulo.`;
+    function controlDeEntradas() {
+        const IDs = ['val-a', 'val-b', 'val-c', 'val-alpha', 'val-gamma'];
+        if (mode === 'obli') IDs.push('val-beta');
+
+        const llenos = IDs.filter(id => document.getElementById(id).value !== "");
+        const status = document.getElementById('data-status');
+        const limite = (mode === 'rect') ? 2 : 3;
+
+        if (llenos.length >= limite) {
+            status.innerText = "Con esta cantidad de datos es suficiente";
+            status.style.color = "#4CAF50";
+            IDs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el.value === "") el.disabled = true;
+            });
         } else {
-            warning.style.display = 'none';
+            status.innerText = "Faltan datos para resolver";
+            status.style.color = "#888";
+            IDs.forEach(id => document.getElementById(id).disabled = false);
         }
     }
 
@@ -214,6 +219,13 @@
         let B = parseFloat(document.getElementById('val-beta').value) || (mode === 'rect' ? 90 : null);
         let G = parseFloat(document.getElementById('val-gamma').value) || null;
 
+        // Validaciones Geométricas Críticas
+        if (A + B + G > 180.01) { alert("Error: La suma de los ángulos no puede superar los 180°."); return; }
+        if (mode === 'rect' && a && b && c) {
+            if (Math.abs(a*a + c*c - b*b) > 0.1) { alert("Error: Los lados no cumplen el Teorema de Pitágoras."); return; }
+        }
+
+        // Motor Matemático
         for (let i = 0; i < 6; i++) {
             if (A && B && !G) G = 180 - A - B;
             if (A && G && !B) B = 180 - A - G;
@@ -240,7 +252,7 @@
             }
         }
 
-        if (!a || isNaN(a)) { alert("Datos insuficientes."); return; }
+        if (!a || isNaN(a) || G <= 0 || A <= 0 || B <= 0) { alert("Error: Triángulo imposible o datos inconsistentes."); return; }
 
         mostrar(a, b, c, A, B, G);
         dibujar(a, b, c, A, B, G);
@@ -249,7 +261,8 @@
 
     function mostrar(a, b, c, A, B, G) {
         document.getElementById('resultados').style.display = 'block';
-        const area = 0.5 * a * c * Math.sin(toRad(B));
+        const s = (a + b + c) / 2;
+        const area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
         document.getElementById('res-content').innerHTML = `
             <div class="res-item"><span>Lado a:</span><span>${a.toFixed(2)}</span></div>
             <div class="res-item"><span>Lado b ${mode==='rect'?'(Hipotenusa)':''}:</span><span>${b.toFixed(2)}</span></div>
@@ -266,12 +279,11 @@
         const svg = document.getElementById('svg-draw');
         document.getElementById('visualizacion').style.display = 'block';
         svg.innerHTML = '';
-
         const scale = 180 / Math.max(a, b, c);
         const sA = a * scale, sB = b * scale, sC = c * scale;
 
-        const xB = 50, yB = 180; // Vértice Beta (esquina izquierda inferior en rect)
-        const xA = xB + sC, yA = 180; // Vértice Alpha (derecha)
+        const xB = 50, yB = 180;
+        const xA = xB + sC, yA = 180;
         const xG = xB + sA * Math.cos(toRad(180-B));
         const yG = yB - sA * Math.sin(toRad(180-B));
 
@@ -280,20 +292,14 @@
         tri.setAttribute("fill", "#00000005"); tri.setAttribute("stroke", "black"); tri.setAttribute("stroke-width", "2");
         svg.appendChild(tri);
 
-        // Etiquetas Lados (Gris)
-        const labels = [
-            {x: (xB+xA)/2, y: yB + 20, t: c.toFixed(1)}, // Lado c
-            {x: (xB+xG)/2 - 25, y: (yB+yG)/2, t: a.toFixed(1)}, // Lado a
-            {x: (xA+xG)/2 + 20, y: (yA+yG)/2, t: b.toFixed(1)}  // Lado b
-        ];
-        labels.forEach(l => svg.appendChild(crearTxt(l.x, l.y, l.t, "#888", "12px", "bold")));
-
-        // Etiquetas Ángulos
+        // Etiquetas Grises
+        svg.appendChild(crearTxt((xB+xA)/2, yB+20, c.toFixed(1), "#888", "12px", "bold"));
+        svg.appendChild(crearTxt((xB+xG)/2-25, (yB+yG)/2, a.toFixed(1), "#888", "12px", "bold"));
+        svg.appendChild(crearTxt((xA+xG)/2+20, (yA+yG)/2, b.toFixed(1), "#888", "12px", "bold"));
         svg.appendChild(crearTxt(xA-25, yA-10, A.toFixed(0)+"°", "#aaa", "10px"));
         svg.appendChild(crearTxt(xB+15, yB-10, B.toFixed(0)+"°", "#aaa", "10px"));
         svg.appendChild(crearTxt(xG, yG+20, G.toFixed(0)+"°", "#aaa", "10px"));
 
-        // Marca de agua Playfair Negrita
         const water = document.createElementNS("http://www.w3.org/2000/svg", "text");
         water.setAttribute("x", "340"); water.setAttribute("y", "240");
         water.setAttribute("text-anchor", "end"); water.setAttribute("font-family", "Playfair Display");
@@ -329,11 +335,16 @@
     }
 
     function limpiar() {
-        document.querySelectorAll('input:not(#val-beta)').forEach(i => i.value = '');
+        document.querySelectorAll('input:not(#val-beta)').forEach(i => {
+            i.value = '';
+            i.disabled = false;
+        });
         document.getElementById('resultados').style.display = 'none';
         document.getElementById('visualizacion').style.display = 'none';
         document.getElementById('btn-export').style.display = 'none';
-        document.getElementById('input-warning').style.display = 'none';
+        const st = document.getElementById('data-status');
+        st.innerText = "Introduce los datos para comenzar";
+        st.style.color = "#888";
     }
 
     updateRefDiagram();
