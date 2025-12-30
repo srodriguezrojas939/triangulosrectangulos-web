@@ -90,7 +90,7 @@
             <svg id="ref-svg" width="220" height="120" viewBox="0 0 200 120"></svg>
         </div>
 
-        <div id="input-warning" class="warning-box">⚠️ Has introducido demasiados datos. Solo se necesitan 3 valores (uno debe ser un lado).</div>
+        <div id="input-warning" class="warning-box"> Has introducido demasiados datos. Solo se necesitan 3 valores (uno debe ser un lado).</div>
 
         <div class="grid-inputs">
             <div class="input-group">
@@ -200,7 +200,7 @@
         const limit = (mode === 'rect') ? 2 : 3;
         if (filled > limit) {
             warning.style.display = 'block';
-            warning.innerText = `⚠️ Solo necesitas introducir ${limit} valores adicionales para resolver el triángulo.`;
+            warning.innerText = ` Solo necesitas introducir ${limit} valores adicionales para resolver el triángulo.`;
         } else {
             warning.style.display = 'none';
         }
