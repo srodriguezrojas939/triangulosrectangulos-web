@@ -284,45 +284,81 @@
         `;
     }
 
-    function dibujar(a, b, c, A, B, G) {
+  function dibujar(a, b, c, A, B, G) {
         const svg = document.getElementById('svg-draw');
         document.getElementById('visualizacion').style.display = 'block';
         svg.innerHTML = '';
 
-        const vB = {x: 0, y: 0};
-        const vA = {x: c, y: 0};
-        const vG = {x: a * Math.cos(toRad(180-B)), y: a * Math.sin(toRad(180-B))};
+        // --- LÓGICA DE COORDENADAS PARA COINCIDIR CON EL DIAGRAMA ---
+        let v1, v2, v3;
 
-        const minX = Math.min(vB.x, vA.x, vG.x);
-        const maxX = Math.max(vB.x, vA.x, vG.x);
-        const minY = Math.min(vB.y, vA.y, vG.y);
-        const maxY = Math.max(vB.y, vA.y, vG.y);
+        if (mode === 'rect') {
+            // En Rectángulo: Beta (90°) en el origen (izquierda)
+            v1 = {x: 0, y: 0}; // Vértice Beta (90°)
+            v2 = {x: c, y: 0}; // Vértice Alpha
+            v3 = {x: 0, y: a}; // Vértice Gamma
+        } else {
+            // En Oblicuángulo: Alpha en el origen (izquierda) para que coincida con el diagrama
+            v1 = {x: 0, y: 0}; // Vértice Alpha
+            v2 = {x: c, y: 0}; // Vértice Beta
+            v3 = {x: b * Math.cos(toRad(A)), y: b * Math.sin(toRad(A))}; // Vértice Gamma
+        }
+
+        // --- ESCALADO Y CENTRADO ---
+        const minX = Math.min(v1.x, v2.x, v3.x);
+        const maxX = Math.max(v1.x, v2.x, v3.x);
+        const minY = Math.min(v1.y, v2.y, v3.y);
+        const maxY = Math.max(v1.y, v2.y, v3.y);
+        
         const triW = maxX - minX;
         const triH = maxY - minY;
-
         const svgW = 350, svgH = 300;
-        const margin = 50;
+        const margin = 60;
+        
         const scale = Math.min((svgW - margin*2) / triW, (svgH - margin*2) / triH);
         const offsetX = (svgW - triW * scale) / 2 - minX * scale;
         const offsetY = (svgH - triH * scale) / 2 - minY * scale;
 
-        const pB = {x: vB.x*scale + offsetX, y: svgH - (vB.y*scale + offsetY)};
-        const pA = {x: vA.x*scale + offsetX, y: svgH - (vA.y*scale + offsetY)};
-        const pG = {x: vG.x*scale + offsetX, y: svgH - (vG.y*scale + offsetY)};
+        // Convertir a coordenadas de pantalla (invertir Y para que crezca hacia arriba)
+        const p1 = {x: v1.x * scale + offsetX, y: svgH - (v1.y * scale + offsetY)};
+        const p2 = {x: v2.x * scale + offsetX, y: svgH - (v2.y * scale + offsetY)};
+        const p3 = {x: v3.x * scale + offsetX, y: svgH - (v3.y * scale + offsetY)};
 
+        // --- DIBUJAR TRIÁNGULO ---
         const tri = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        tri.setAttribute("d", `M${pB.x},${pB.y} L${pA.x},${pA.y} L${pG.x},${pG.y} Z`);
-        tri.setAttribute("fill", "#00000005"); tri.setAttribute("stroke", "black"); tri.setAttribute("stroke-width", "2");
+        tri.setAttribute("d", `M${p1.x},${p1.y} L${p2.x},${p2.y} L${p3.x},${p3.y} Z`);
+        tri.setAttribute("fill", "#00000005");
+        tri.setAttribute("stroke", "black");
+        tri.setAttribute("stroke-width", "2");
         svg.appendChild(tri);
 
-        svg.appendChild(crearTxt((pB.x+pA.x)/2, pB.y + 20, c.toFixed(1), "#888", "12px", "bold"));
-        svg.appendChild(crearTxt((pB.x+pG.x)/2-25, (pB.y+pG.y)/2, a.toFixed(1), "#888", "12px", "bold"));
-        svg.appendChild(crearTxt((pA.x+pG.x)/2+20, (pA.y+pG.y)/2, b.toFixed(1), "#888", "12px", "bold"));
+        // --- POSICIONAR ETIQUETAS ---
+        // Lado c (Base)
+        svg.appendChild(crearTxt((p1.x + p2.x) / 2, Math.max(p1.y, p2.y) + 25, "c = " + c.toFixed(1), "#888", "12px", "bold"));
+        
+        if (mode === 'rect') {
+            // Lado a (Altura izquierda)
+            svg.appendChild(crearTxt(p1.x - 35, (p1.y + p3.y) / 2, "a = " + a.toFixed(1), "#888", "12px", "bold"));
+            // Lado b (Hipotenusa)
+            svg.appendChild(crearTxt((p2.x + p3.x) / 2 + 25, (p2.y + p3.y) / 2 - 10, "b = " + b.toFixed(1), "#888", "12px", "bold"));
+            
+            // Ángulos
+            svg.appendChild(crearTxt(p2.x - 30, p2.y - 10, A.toFixed(0) + "° (α)", "#aaa", "11px"));
+            svg.appendChild(crearTxt(p1.x + 20, p1.y - 10, B.toFixed(0) + "° (β)", "#aaa", "11px"));
+            svg.appendChild(crearTxt(p3.x + 10, p3.y + 25, G.toFixed(0) + "° (γ)", "#aaa", "11px"));
+        } else {
+            // Lado b (Izquierda)
+            svg.appendChild(crearTxt((p1.x + p3.x) / 2 - 35, (p1.y + p3.y) / 2, "b = " + b.toFixed(1), "#888", "12px", "bold"));
+            // Lado a (Derecha)
+            svg.appendChild(crearTxt((p2.x + p3.x) / 2 + 35, (p2.y + p3.y) / 2, "a = " + a.toFixed(1), "#888", "12px", "bold"));
+            
+            // Ángulos
+            svg.appendChild(crearTxt(p1.x + 25, p1.y - 10, A.toFixed(0) + "° (α)", "#aaa", "11px"));
+            svg.appendChild(crearTxt(p2.x - 25, p2.y - 10, B.toFixed(0) + "° (β)", "#aaa", "11px"));
+            svg.appendChild(crearTxt(p3.x, p3.y - 15, G.toFixed(0) + "° (γ)", "#aaa", "11px"));
+        }
 
-        svg.appendChild(crearTxt(pA.x-25, pA.y-10, A.toFixed(0)+"°", "#aaa", "10px"));
-        svg.appendChild(crearTxt(pB.x+15, pB.y-10, B.toFixed(0)+"°", "#aaa", "10px"));
-        svg.appendChild(crearTxt(pG.x, pG.y-15, G.toFixed(0)+"°", "#aaa", "10px"));
-
+        // Marca de agua
         const water = document.createElementNS("http://www.w3.org/2000/svg", "text");
         water.setAttribute("x", svgW - 20); water.setAttribute("y", svgH - 20);
         water.setAttribute("text-anchor", "end"); water.setAttribute("font-family", "Playfair Display");
